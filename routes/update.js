@@ -26,7 +26,7 @@ const compare = await bcrypt.compare(password , user.password)
 if(compare){
     delete user.password;
 
-const token = Jwt.sign({_id: user._id} , "umar")
+const token = Jwt.sign({_id: user._id} , process.env.JWT_SECRET)
             return res.status(200).send({status_code: 200,  messege: "sucess" , token ,  user: user})
 }else{
     return res.status(403).send({status_code: 403, user: "Rong Password"});

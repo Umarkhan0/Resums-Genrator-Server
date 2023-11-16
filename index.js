@@ -3,6 +3,7 @@ const app = express();
 import router from "./routes/index.js";
 import chalk from "chalk";
 import mongoose from "./db/index.js";
+import 'dotenv/config.js'
 const PORT = process.env.PORT || 8000
 let db = mongoose.connection;
 db.on("error" , console.error.bind(console, "connection error"));
