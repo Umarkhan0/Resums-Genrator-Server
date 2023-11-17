@@ -1,6 +1,5 @@
 import express from "express";
 const router = express.Router();
-import todosArr from "./data.js";
 import Joi from "joi";
 import  Jwt  from "jsonwebtoken";
 import User from "../models/user.js";
