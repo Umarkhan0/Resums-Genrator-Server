@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-// const {Schema} = "mongoose"
-const UserSchema = mongoose.Schema({
+
+const UserSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -8,12 +8,20 @@ const UserSchema = mongoose.Schema({
     email: {
         type: String,
         required: true,
-         unique: true
+        unique: true
     },
     password: {
         type: String,
         required: true,
-    }
+    },
+    vrifycode: {
+        type: String,
+        required: true,
+    },
+}, {
+    timestamps: true
 });
-const User = mongoose.model("User" , UserSchema);
-export default User
+UserSchema.index({ name: 1 }, { expireAfterSeconds: true });
+const User = mongoose.model("User", UserSchema);
+
+export default User;
