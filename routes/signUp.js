@@ -6,24 +6,25 @@ import Jwt from 'jsonwebtoken';
 import Joi from 'joi';
 import User from '../models/user.js';
 import dotenv from 'dotenv';
+import OTP from '../models/otp.js';
 dotenv.config();
 const DateTime = (servertimeStemp) => {
   const localDateTimeString = servertimeStemp;
 
-// Create a Date object from the string
-const localDateTime = new Date(localDateTimeString);
+  // Create a Date object from the string
+  const localDateTime = new Date(localDateTimeString);
 
-// Convert to a different time zone
-const targetTimeZone = "Asia/Kolkata"; // Replace with your target time zone
-const options = { timeZone: targetTimeZone };
+  // Convert to a different time zone
+  const targetTimeZone = "Asia/Kolkata"; // Replace with your target time zone
+  const options = { timeZone: targetTimeZone };
 
-// Format the date
-const formattedDate = localDateTime.toLocaleDateString('en-US', options);
+  // Format the date
+  const formattedDate = localDateTime.toLocaleDateString('en-US', options);
 
-// Format the time
-const formattedTime = localDateTime.toLocaleTimeString('en-US', options);
+  // Format the time
+  const formattedTime = localDateTime.toLocaleTimeString('en-US', options);
 
-return formattedDate
+  return formattedDate
 }
 const router = express.Router();
 
@@ -33,19 +34,19 @@ const userSchema = Joi.object({
   password: Joi.string().required().min(6),
 });
 
-const sendVerifyMail = async (name, email, otp , time) => {
+const sendVerifyMail = async (name, email, otp, time) => {
   console.log(time);
   try {
     const transporter = nodemailer.createTransport({
-     service: "gmail",
-    auth: {
+      service: "gmail",
+      auth: {
         user: 'umaraamir959@gmail.com',
         pass: process.env.APP_PASS
-    }
+      }
     });
 
     const info = {
-      from:`"Resums-Genrator 👻" <${process.env.EMAIL_USERNAME}>` ,
+      from: `"Resums-Genrator 👻" <${process.env.EMAIL_USERNAME}>`,
       to: email,
       subject: 'Your login verification code',
       html: `
@@ -267,17 +268,28 @@ router.post('/', async (req, res) => {
     if (existingUser) {
       return res.status(400).send({ message: 'Email is already registered.' });
     }
-let vrifycode =  otpGenerator.generate(5,  { lowerCaseAlphabets: false , upperCaseAlphabets: false, specialChars: false });
-console.log(vrifycode);
+    let vrifycode = otpGenerator.generate(5, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false });
+    console.log(vrifycode);
     const password = await bcrypt.hash(req.body.password, 10);
-    const user = new User({ ...req.body, password , vrifycode });
+    const user = new User({ ...req.body, password, vrify: false });
 
 
-    const token = Jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
     const newUser = await user.save();
-console.log(req.body.createdAt);
-    res.status(200).send({ status_code: 200, user: newUser, token });
-    sendVerifyMail(user.name, user.email, user.vrifycode , user.createdAt);
+    console.log(req.body.createdAt);
+    if (newUser) {
+      console.log(newUser._id);
+      const userOtp = new OTP({ email: newUser.email, otp: vrifycode });
+      await userOtp.save();
+      res.status(200).send({ status_code: 200, user: newUser});
+      // const user = new User({});
+      sendVerifyMail(user.name, user.email, userOtp.otp, userOtp.createdAt);
+    }
+
+    else {
+      res.status(403).send({ messege: "time out" })
+    }
+
+
     console.log(user.createdAt);
   } catch (err) {
     console.error('Registration error:', err.message);

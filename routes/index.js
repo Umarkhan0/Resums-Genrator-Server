@@ -5,9 +5,12 @@ import getAllusers from "./alluserget.js"
 import putReq from "./login.js";
 import verify from "./optvalidate.js";
 import alldata from "./alldataResumepost.js"
+import resendOtp from "./reSentOtp.js"
 router.use("/login" , putReq);
 router.use("/verify" , verify);
 router.use("/signup" , postReq);
+// console.log(req.url);
 router.use("/allpost" , alldata);
+router.use("/reSentotp" , resendOtp);
 router.use("/allget" , getAllusers);
 export default router;

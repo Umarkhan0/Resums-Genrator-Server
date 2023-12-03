@@ -7,7 +7,7 @@ const verifyToken = (request , response , next) => {
         if(err){
      return response.status(400).send({ err});
         }else{
-            return next()
+            return next();
         }
     })
 }
