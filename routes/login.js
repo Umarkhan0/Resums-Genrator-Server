@@ -5,8 +5,8 @@ import  Jwt  from "jsonwebtoken";
 import User from "../models/user.js";
 import bcrypt from "bcrypt"
 const userSchema = Joi.object({
-    password: Joi.string().required(),
-    email: Joi.string().email({ tlds: { allow: false } })
+    email: Joi.string().email({ tlds: { allow: false } }).required(),
+    password: Joi.string().required().min(6)
 });
 router.post("/", async (req, res) => {
     try {
@@ -23,9 +23,9 @@ router.post("/", async (req, res) => {
 
 const compare = await bcrypt.compare(password , user.password)
 if(compare){
-    delete user.password;
 
-const token = Jwt.sign({_id: user._id} , process.env.JWT_SECRET)
+const token = Jwt.sign({_id: user._id , password: user.password} , process.env.JWT_SECRET);
+delete user.password;
             return res.status(200).send({status_code: 200,  messege: "sucess" , token ,  user: user})
 }else{
     return res.status(403).send({status_code: 403, user: "Rong Password"});
